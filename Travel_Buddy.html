@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel_Buddy | Dynamic Planner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e54c8;
+            --secondary-color: #8f94fb;
+            --accent-color: #ff6b6b;
+            --dark-bg: #121212;
+            --darker-bg: #0a0a0a;
+            --light-text: #f5f5f5;
+            --muted-text: #aaaaaa;
+            --card-bg: #1e1e1e;
+            --transition-speed: 0.3s;
+            --header-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            overflow-x: hidden;
+            transition: background-color var(--transition-speed);
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background-color: var(--darker-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .main-nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color var(--transition-speed);
+            position: relative;
+        }
+
+        .main-nav a:hover {
+            color: var(--accent-color);
+        }
+
+        .main-nav a.active {
+            color: var(--accent-color);
+        }
+
+        .main-nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-btn, .profile-btn {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 18px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--darker-bg);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 220px;
+            padding: 10px 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-speed);
+            z-index: 1001;
+        }
+
+        .profile-menu.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .profile-menu::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid var(--darker-bg);
+        }
+
+        .profile-menu-item {
+            padding: 12px 20px;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: background-color var(--transition-speed);
+        }
+
+        .profile-menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .profile-menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: var(--header-height);
+            height: 500px;
+            background-image: url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 80px;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 5px;
+            display: flex;
+            max-width: 600px;
+            margin-top: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            outline: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .search-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color var(--transition-speed);
+        }
+
+        .search-btn:hover {
+            background-color: #ff5252;
+        }
+
+        /* Categories Section */
+        .categories {
+            display: flex;
+            justify-content: center;
+            padding: 30px 0;
+            background-color: var(--darker-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 20px;
+            text-decoration: none;
+            color: var(--light-text);
+            transition: transform var(--transition-speed);
+        }
+
+        .category-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .category-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Trending Section */
+        .section {
+            padding: 60px 80px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
+        .destinations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .destination-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .destination-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .destination-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .destination-info {
+            padding: 20px;
+        }
+
+        .destination-info h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .destination-info p {
+            color: var(--muted-text);
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .destination-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .price {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .rating {
+            color: #ffc107;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--darker-bg);
+            padding: 40px 80px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--light-text);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--muted-text);
+            text-decoration: none;
+            transition: color var(--transition-speed);
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .copyright {
+            color: var(--muted-text);
+            font-size: 14px;
+        }
+
+        .footer-controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        .language-selector, .currency-selector {
+            position: relative;
+        }
+
+        .language-selector select, .currency-selector select {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--light-text);
+            padding: 8px 30px 8px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .language-selector::after, .currency-selector::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--muted-text);
+            pointer-events: none;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero {
+                padding: 0 40px;
+                height: 400px;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .section {
+                padding: 40px;
+            }
+            
+            .main-nav {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 0 20px;
+            }
+            
+            .hero {
+                padding: 0 20px;
+                height: 350px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .section {
+                padding: 30px 20px;
+            }
+            
+            .categories {
+                flex-wrap: wrap;
+            }
+            
+            .category-item {
+                margin: 10px;
+                min-width: 80px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            --dark-bg: #f5f5f5;
+            --darker-bg: #e0e0e0;
+            --light-text: #333333;
+            --muted-text: #666666;
+            --card-bg: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-plane"></i>
+            <span>Travel_Buddy</span>
+        </div>
+        
+        <nav class="main-nav">
+            <a href="#" class="active">Discover</a>
+            <a href="#">Trips</a>
+            <a href="#">Review</a>
+            <a href="#">Forums</a>
+        </nav>
+        
+        <div class="header-controls">
+            <button class="notification-btn">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count">3</span>
+            </button>
+            
+            <div class="profile-dropdown">
+                <button class="profile-btn" id="profileBtn">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                
+                <div class="profile-menu" id="profileMenu">
+                    <a href="#" class="profile-menu-item">
+                        <i class="fas fa-suitcase"></i>
+                        <span>Trips</span>
+                    </a>
+                    <a href="#" class="profile-menu-item">
+                        <i class="fas fa-edit"></i>
+                        <span>Write a Review</span>
+                    </a>
+                    <a href="#" class="profile-menu-item">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="#" class="profile-menu-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Booking</span>
+                    </a>
+                    <a href="#" class="profile-menu-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>Messages</span>
+                    </a>
+                    <a href="#" class="profile-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Account Info</span>
+                    </a>
+                    
+                    <div class="profile-divider"></div>
+                    
+                    <a href="#" class="profile-menu-item" id="signOutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sign Out</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Discover Your Next Adventure</h1>
+            <p>Find the perfect destination for your next trip with our AI-powered recommendations</p>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Where to?">
+                <button class="search-btn">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories">
+        <a href="#" class="category-item">
+            <div class="category-icon">
+                <i class="fas fa-hotel"></i>
+            </div>
+            <span class="category-label">Hotels</span>
+        </a>
+        
+        <a href="#" class="category-item">
+            <div class="category-icon">
+                <i class="fas fa-umbrella-beach"></i>
+            </div>
+            <span calass="category-label">Things to Do</span>
+        </a>
+        
+        <a href="#" class="category-item">
+            <div class="category-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <span class="category-label">Restaurants</span>
+        </a>
+        
+        <a href="#" class="category-item">
+            <div class="category-icon">
+                <i class="fas fa-plane"></i>
+            </div>
+            <span class="category-label">Flights</span>
+        </a>
+        
+        <a href="#" class="category-item">
+            <div class="category-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <span class="category-label">Holiday Homes</span>
+        </a>
+    </section>
+
+    <!-- Trending Destinations -->
+    <section class="section">
+        <h2 class="section-title"><i class="fas fa-fire"></i> Trending Destinations</h2>
+        
+        <div class="destinations">
+            <div class="destination-card">
+                <div class="destination-img" style="background-image: url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                <div class="destination-info">
+                    <h3>Bali, Indonesia</h3>
+                    <p>Known for its forested volcanic mountains, iconic rice paddies, beaches and coral reefs.</p>
+                    <div class="destination-meta">
+                        <span class="price">$850</span>
+                        <span class="rating"><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="destination-card">
+                <div class="destination-img" style="background-image: url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                <div class="destination-info">
+                    <h3>Kyoto, Japan</h3>
+                    <p>Famous for its numerous classical Buddhist temples, gardens, imperial palaces and traditional houses.</p>
+                    <div class="destination-meta">
+                        <span class="price">$1200</span>
+                        <span class="rating"><i class="fas fa-star"></i> 4.9</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="destination-card">
+                <div class="destination-img" style="background-image: url('https://images.unsplash.com/photo-1518391846015-55a9cc003b25?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                <div class="destination-info">
+                    <h3>Santorini, Greece</h3>
+                    <p>Famous for its dramatic views, stunning sunsets, white-washed houses, and beautiful beaches.</p>
+                    <div class="destination-meta">
+                        <span class="price">$950</span>
+                        <span class="rating"><i class="fas fa-star"></i> 4.7</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="destination-card">
+                <div class="destination-img" style="background-image: url('https://images.unsplash.com/photo-1503917988258-f87a78e3c995?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                <div class="destination-info">
+                    <h3>Paris, France</h3>
+                    <p>Known for its art, fashion, gastronomy and culture. The city is a world center for art and fashion.</p>
+                    <div class="destination-meta">
+                        <span class="price">$1100</span>
+                        <span class="rating"><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>About Travel_Budget</h3>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Press</a></li>
+                    <li><a href="#">Resources</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Trust & Safety</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Explore</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Write a Review</a></li>
+                    <li><a href="#">Add a Place</a></li>
+                    <li><a href="#">Join</a></li>
+                    <li><a href="#">Travelers' Choice</a></li>
+                    <li><a href="#">GreenLeaders</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Do Business With Us</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Owners</a></li>
+                    <li><a href="#">Business Advantage</a></li>
+                    <li><a href="#">Sponsored Placements</a></li>
+                    <li><a href="#">Advertise</a></li>
+                    <li><a href="#">Become an Affiliate</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Get the App</h3>
+                <ul class="footer-links">
+                    <li><a href="#">iPhone App</a></li>
+                    <li><a href="#">Android App</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="copyright">
+                © 2025 Travel_Budget, Inc. All rights reserved.
+            </div>
+            
+            <div class="footer-controls">
+                <div class="currency-selector">
+                    <select id="currencySelect">
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="JPY">JPY - Japanese Yen</option>
+                        <option value="INR">INR - Indian Rupee</option>
+                    </select>
+                </div>
+                
+                <div class="language-selector">
+                    <select id="languageSelect">
+                        <option value="en">English (United States)</option>
+                        <option value="fr">Français (France)</option>
+                        <option value="es">Español (España)</option>
+                        <option value="de">Deutsch (Deutschland)</option>
+                        <option value="ja">日本語 (日本)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Profile Dropdown
+        const profileBtn = document.getElementById('profileBtn');
+        const profileMenu = document.getElementById('profileMenu');
+        
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileMenu.classList.toggle('active');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            profileMenu.classList.remove('active');
+        });
+        
+        // Sign Out Functionality
+        const signOutBtn = document.getElementById('signOutBtn');
+        signOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // In a real app, this would redirect to login page
+            alert('You have been signed out. Redirecting to login page...');
+            // window.location.href = 'login.html';
+        });
+        
+        // Language Selector
+        const languageSelect = document.getElementById('languageSelect');
+        languageSelect.addEventListener('change', () => {
+            // In a real app, this would change the language of the site
+            alert(`Language changed to ${languageSelect.options[languageSelect.selectedIndex].text}`);
+        });
+        
+        // Currency Selector
+        const currencySelect = document.getElementById('currencySelect');
+        currencySelect.addEventListener('change', () => {
+            // In a real app, this would change the currency across the site
+            alert(`Currency changed to ${currencySelect.options[currencySelect.selectedIndex].text}`);
+        });
+        
+        // Active Nav Link
+        const navLinks = document.querySelectorAll('.main-nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+        
+        // Search Functionality
+        const searchInput = document.querySelector('.search-input');
+        const searchBtn = document.querySelector('.search-btn');
+        
+        searchBtn.addEventListener('click', () => {
+            if (searchInput.value.trim()) {
+                alert(`Searching for: ${searchInput.value}`);
+            } else {
+                alert('Please enter a destination to search');
+            }
+        });
+        
+        // Allow search on Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
